@@ -2,7 +2,8 @@ import os
 import filecmp
 import shutil
 import sys
-from stat import *
+import logging
+import time
 
 
 class Node:
@@ -48,17 +49,25 @@ class Synchronizer:
             path = os.path.join(src, os.path.basename(file))
             if os.path.isdir(path):
                 shutil.copytree(path, os.path.join(destination, os.path.basename(file)))
+                logging.info('Copied directory {} from {} to {}'.format(os.path.basename(path), os.path.dirname(path), destination))
+                print('Copied directory {} from {} to {}'.format(os.path.basename(path), os.path.dirname(path), destination))
             else:
                 shutil.copy2(path, destination)
+                logging.info('Copied {} from {} to {}'.format(os.path.basename(path), os.path.dirname(path), destination))
+                print('Copied {} from {} to {}'.format(os.path.basename(path), os.path.dirname(path), destination))
+
 
     def _remove(self, file_list, src):
         for file in file_list:
             path = os.path.join(src, os.path.basename(file))
             if os.path.isdir(path):
                 shutil.rmtree(path)
+                logging.info('Deleted directory {} from {}'.format(os.path.basename(path), os.path.dirname(path)))
+                print('Deleted directory {} from {}'.format(os.path.basename(path), os.path.dirname(path)))
             else:
                 os.remove(path)
-
+                logging.info('Deleted {} from {}'.format(os.path.basename(path), os.path.dirname(path)))
+                print('Deleted directory {} from {}'.format(os.path.basename(path), os.path.dirname(path)))
 
 
 if __name__ == "__main__":
@@ -67,5 +76,8 @@ if __name__ == "__main__":
     folder2 = Node(sys.argv[2])
     synchrinizer.node_list.append(folder1)
     synchrinizer.node_list.append(folder2)
-    synchrinizer.compare_folders()
+    logging.basicConfig(level=logging.INFO, filename=sys.argv[3], filemode="w")
+    while True:
+        synchrinizer.compare_folders()
+        time.sleep(float(sys.argv[4]))
 
